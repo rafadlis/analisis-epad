@@ -1,0 +1,900 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["typedSql"]
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model AttributeContent {
+  SPT         String      @db.VarChar(8)
+  AtbID       Int
+  AtbValue    String?     @db.VarChar(50)
+  MsAttribute MsAttribute @relation(fields: [AtbID], references: [AtbID], onUpdate: NoAction, map: "FK_AttributeContent_MsAttribute")
+
+  @@id([SPT, AtbID], map: "PK_AttributeContent")
+}
+
+model DOK {
+  SPT     String   @id(map: "PK_DOK") @db.VarChar(8)
+  DOK     Bytes    @db.Image
+  UserUpd String   @db.VarChar(20)
+  DateUpd DateTime @db.DateTime
+}
+
+model GeneralParameter {
+  ParamID       String   @id(map: "PK_GeneralParameter") @db.VarChar(20)
+  NoUrut        Int      @db.TinyInt
+  ParamName     String   @db.VarChar(70)
+  ParamStrValue String   @db.VarChar(100)
+  ParamNumValue Decimal? @db.Decimal(18, 2)
+  ParamUnit     String?  @db.VarChar(100)
+  IsVisible     String   @db.Char(1)
+  IsUpdateable  String   @db.Char(1)
+  UserUpd       String   @db.VarChar(20)
+  DateUpd       DateTime @db.DateTime
+}
+
+model GroupAttribute {
+  GroupID                                                            Int                    @id(map: "PK_GroupAttribute")
+  GroupName                                                          String                 @db.VarChar(50)
+  GroupDesc                                                          String                 @db.VarChar(50)
+  IsTarif                                                            String?                @db.Char(1)
+  GroupAttributeDetail                                               GroupAttributeDetail[]
+  MsJenisPendapatan_MsJenisPendapatan_GroupAttributeToGroupAttribute MsJenisPendapatan[]    @relation("MsJenisPendapatan_GroupAttributeToGroupAttribute") @ignore
+}
+
+model GroupAttributeDetail {
+  GroupID        Int
+  AtbID          Int
+  sorting        Int            @db.TinyInt
+  GroupAttribute GroupAttribute @relation(fields: [GroupID], references: [GroupID], onUpdate: NoAction, map: "FK_GroupAttributeDetail_GroupAttribute")
+  MsAttribute    MsAttribute    @relation(fields: [AtbID], references: [AtbID], onUpdate: NoAction, map: "FK_GroupAttributeDetail_MsAttribute")
+
+  @@id([GroupID, AtbID], map: "PK_GroupAttributeDetail")
+}
+
+model INTEGRASI_SKP {
+  KDUNIT String @db.VarChar(30)
+  NOSKP  String @db.VarChar(50)
+
+  @@id([KDUNIT, NOSKP], map: "PK__INTEGRAS__B01B3473147C05D0")
+}
+
+model INTEGRASI_STS {
+  KDUNIT String @db.VarChar(30)
+  NOSTS  String @db.VarChar(50)
+
+  @@id([KDUNIT, NOSTS], map: "PK__INTEGRAS__B01B40BF10AB74EC")
+}
+
+model INTEGRASI_TBP {
+  KDUNIT String @db.VarChar(30)
+  NOTBP  String @db.VarChar(50)
+
+  @@id([KDUNIT, NOTBP], map: "PK__INTEGRAS__903494BF0CDAE408")
+}
+
+model MATANGD {
+  MTGKEY     String  @id(map: "PK_MATANGD") @db.Char(10)
+  MTGLEVEL   String  @db.Char(2)
+  KDPER      String  @db.VarChar(30)
+  NMPER      String  @db.VarChar(200)
+  TYPE       String  @db.Char(1)
+  MAT_MTGKEY String  @db.Char(10)
+  REKSIPKD   String? @db.VarChar(30)
+}
+
+model MsAttribute {
+  AtbID                Int                    @id(map: "PK_MsAttribute") @default(autoincrement())
+  AtbName              String                 @db.VarChar(30)
+  AtbType              String                 @db.Char(1)
+  AtbLength            Int?                   @db.TinyInt
+  IsTarif              String?                @db.Char(1)
+  AttributeContent     AttributeContent[]
+  GroupAttributeDetail GroupAttributeDetail[]
+}
+
+model MsBank {
+  BankID      String        @id(map: "PK_MSBANK") @db.VarChar(2)
+  Bank        String        @db.VarChar(30)
+  AkronimBank String        @db.VarChar(20)
+  CabangBank  String        @db.VarChar(50)
+  AlamatBank  String        @db.VarChar(100)
+  TelpBank    String        @db.VarChar(50)
+  Status      String        @db.Char(1)
+  UserUpd     String        @db.VarChar(20)
+  DateUpd     DateTime      @db.DateTime
+  MsBendahara MsBendahara[]
+}
+
+model MsBenda {
+  BendaID         String            @id(map: "PK_MsBenda") @db.VarChar(5)
+  KodeBenda       String            @unique(map: "IX_MsBenda") @db.VarChar(20)
+  Benda           String            @db.VarChar(50)
+  UPTID           String            @db.VarChar(5)
+  TarifBenda      Decimal           @db.Decimal(18, 0)
+  JmlPerBlok      Int               @db.SmallInt
+  DasarHukum      String            @db.VarChar(100)
+  Status          String            @db.Char(1)
+  UserUpd         String            @db.VarChar(20)
+  DateUpd         DateTime          @db.DateTime
+  MsUPT           MsUPT             @relation(fields: [UPTID], references: [UPTID], onUpdate: NoAction, map: "FK_MsBenda_MsUPT")
+  PersediaanBenda PersediaanBenda[]
+  SetoranBendaDtl SetoranBendaDtl[]
+}
+
+model MsBendahara {
+  BendaharaID   String          @id(map: "PK_MsBendahara") @db.VarChar(2)
+  PegawaiID     String          @db.VarChar(2)
+  BankID        String          @db.VarChar(2)
+  Rekening      String          @db.VarChar(50)
+  NamaRekening  String          @db.VarChar(50)
+  Status        String          @db.Char(1)
+  UserUpd       String          @db.VarChar(20)
+  DateUpd       DateTime        @db.DateTime
+  MsBank        MsBank          @relation(fields: [BankID], references: [BankID], onUpdate: NoAction, map: "FK_MsBendahara_MsBank")
+  MsPegawai     MsPegawai       @relation(fields: [PegawaiID], references: [PegawaiID], onUpdate: NoAction, map: "FK_MsBendahara_MsPegawai")
+  SetoranUPTHdr SetoranUPTHdr[]
+}
+
+model MsDenda {
+  DendaID  Int     @id(map: "PK_MsDenda")
+  OmzAwal  Decimal @db.Decimal(18, 0)
+  OmzAkhir Decimal @db.Decimal(18, 0)
+  Denda    Decimal @db.Decimal(18, 0)
+  Status   String  @db.Char(1)
+}
+
+model MsGrupUsaha {
+  GrupUsahaID String @id(map: "PK_MsGrupUsaha") @db.VarChar(3)
+  GrupUsaha   String @db.VarChar(50)
+  Keterangan  String @db.VarChar(50)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model MsJenisPendapatan {
+  NamaJenisPendapatan                                             String          @db.VarChar(100)
+  FlagJenisPendapatan                                             String          @db.Char(1)
+  FlagBendaBerharga                                               String          @db.Char(1)
+  ParentID                                                        String          @db.VarChar(10)
+  PrefixNumber                                                    String          @db.VarChar(10)
+  MasaPendapatan                                                  String?         @db.Char(1)
+  KodeRekening                                                    String          @db.VarChar(30)
+  HariJatuhTempo                                                  Int?            @db.SmallInt
+  GroupAttribute                                                  Int?
+  OmzetBase                                                       String?         @db.Char(1)
+  OmzetID                                                         String?         @db.Char(1)
+  OmzetProsentase                                                 Decimal?        @db.Decimal(18, 2)
+  Status                                                          String          @db.Char(1)
+  SelfAssessment                                                  String?         @db.Char(1)
+  RekeningDenda                                                   String?         @db.VarChar(10)
+  UserUpd                                                         String          @db.VarChar(20)
+  DateUpd                                                         DateTime        @db.DateTime
+  GroupAttribute_MsJenisPendapatan_GroupAttributeToGroupAttribute GroupAttribute? @relation("MsJenisPendapatan_GroupAttributeToGroupAttribute", fields: [GroupAttribute], references: [GroupID], onDelete: NoAction, onUpdate: NoAction, map: "FK_MsJenisPendapatan_GroupAttribute")
+  MsSatuanOmzet                                                   MsSatuanOmzet?  @relation(fields: [OmzetID], references: [OmzetID], onDelete: NoAction, onUpdate: NoAction, map: "FK_MsJenisPendapatan_MsSatuanOmzet")
+
+  @@ignore
+}
+
+model MsJenisUsaha {
+  UsahaID    Int      @id(map: "PK_MsJenisUsaha") @default(autoincrement())
+  NamaUsaha  String   @db.VarChar(50)
+  TarifUsaha Decimal  @db.Decimal(18, 2)
+  Persen     Decimal  @db.Decimal(18, 2)
+  Satuan     String   @db.VarChar(20)
+  Periode    String   @db.Char(2)
+  Status     String   @db.Char(1)
+  UserUpd    String   @db.VarChar(20)
+  DateUpd    DateTime @db.DateTime
+}
+
+model MsKecamatan {
+  KecamatanID     String        @id(map: "PK_MSKECAMATAN") @db.VarChar(6)
+  KotaID          String        @db.VarChar(5)
+  Kecamatan       String        @db.VarChar(30)
+  AlamatKecamatan String        @db.VarChar(100)
+  TelpKecamatan   String        @db.VarChar(30)
+  FaxKecamatan    String        @db.VarChar(30)
+  Status          String        @db.Char(1)
+  UserUpd         String        @db.VarChar(20)
+  DateUpd         DateTime      @db.DateTime
+  MsKota          MsKota        @relation(fields: [KotaID], references: [KotaID], onUpdate: NoAction, map: "FK_MsKecamatan_MsKota")
+  MsKelurahan     MsKelurahan[]
+}
+
+model MsKelurahan {
+  KelurahanID     String      @db.VarChar(6)
+  KecamatanID     String      @db.VarChar(6)
+  Kelurahan       String      @db.VarChar(30)
+  AlamatKelurahan String      @db.VarChar(100)
+  TelpKelurahan   String      @db.VarChar(30)
+  FaxKelurahan    String      @db.VarChar(30)
+  KodePos         String      @db.VarChar(6)
+  Status          String      @db.Char(1)
+  UserUpd         String      @db.VarChar(20)
+  DateUpd         DateTime    @db.DateTime
+  MsKecamatan     MsKecamatan @relation(fields: [KecamatanID], references: [KecamatanID], onUpdate: NoAction, map: "FK_MSKELURA_FK_MSKELU_MSKECAMA")
+
+  @@id([KelurahanID, KecamatanID], map: "PK_MSKELURAHAN")
+}
+
+model MsKlasifikasiUsaha {
+  KlasifikasiID String @id(map: "PK_MsKlasifikasiUsaha") @db.VarChar(5)
+  JenisUsaha    String @db.VarChar(20)
+  KlasUsaha     String @db.VarChar(50)
+}
+
+model MsKota {
+  KotaID      String        @id(map: "PK_MsKota") @db.VarChar(5)
+  PropinsiID  String        @db.VarChar(2)
+  Kota        String        @db.VarChar(50)
+  Status      String        @db.Char(1)
+  UserUpd     String        @db.VarChar(20)
+  DateUpd     DateTime      @db.DateTime
+  MsKecamatan MsKecamatan[]
+  MsPropinsi  MsPropinsi    @relation(fields: [PropinsiID], references: [PropinsiID], onUpdate: NoAction, map: "FK_MsKota_MsPropinsi")
+  MsWPData    MsWPData[]
+  MsWPOData   MsWPOData[]
+}
+
+model MsLaporan {
+  LaporanID   String   @id(map: "PK_Laporan") @db.VarChar(5)
+  KodeLaporan String   @db.VarChar(5)
+  Keterangan  String   @db.VarChar(100)
+  Jenis       String?  @db.Char(1)
+  ParentID    String   @db.VarChar(5)
+  PegawaiID   String   @db.VarChar(2)
+  NamaFile    String?  @db.VarChar(50)
+  Status      String   @db.Char(1)
+  UserUpd     String   @db.VarChar(20)
+  DateUpd     DateTime @db.DateTime
+}
+
+model MsLokasiKhusus {
+  LokasiID   String @id(map: "PK_MsLokasiKhusus") @db.VarChar(2)
+  Lokasi     String @db.VarChar(50)
+  Insidentil String @db.VarChar(1)
+  Laporan    String @db.VarChar(1)
+}
+
+model MsPegawai {
+  PegawaiID   String        @id(map: "PK_MsPegawai") @db.VarChar(2)
+  NIP         String        @unique(map: "IX_MsPegawai") @db.VarChar(50)
+  Jabatan     String        @db.VarChar(100)
+  Nama        String        @db.VarChar(50)
+  Pangkat     String        @db.VarChar(50)
+  UID         String        @db.VarChar(15)
+  UPTID       String        @db.VarChar(5)
+  Status      String        @db.Char(1)
+  UserUpd     String        @db.VarChar(20)
+  DateUpd     DateTime      @db.DateTime
+  MsBendahara MsBendahara[]
+  MsUPT       MsUPT         @relation(fields: [UPTID], references: [UPTID], onUpdate: NoAction, map: "FK_MsPegawai_MsUPT")
+}
+
+model MsPropinsi {
+  PropinsiID String   @id(map: "PK_MsPropinsi") @db.VarChar(2)
+  Propinsi   String   @db.VarChar(50)
+  Status     String   @db.Char(1)
+  UserUpd    String   @db.VarChar(20)
+  DateUpd    DateTime @db.DateTime
+  MsKota     MsKota[]
+}
+
+model MsRekDtl {
+  KDPER    String    @id(map: "PK_MsRekDtl") @db.VarChar(30)
+  NMPER    String    @db.VarChar(200)
+  MTGLEVEL String    @db.Char(2)
+  RekID    String?   @db.VarChar(5)
+  MsRekHdr MsRekHdr? @relation(fields: [RekID], references: [RekID], onDelete: NoAction, onUpdate: NoAction, map: "FK_MsRekDtl_MsRekHdr")
+}
+
+model MsRekHdr {
+  RekID    String     @id(map: "PK_MsRekHdr") @db.VarChar(5)
+  Rek      String     @db.VarChar(50)
+  Singkat  String     @db.VarChar(50)
+  MsRekDtl MsRekDtl[]
+}
+
+model MsRT {
+  RTID    Int      @id(map: "PK_MSRT") @default(autoincrement()) @db.SmallInt
+  RWID    Int      @db.SmallInt
+  RT      String   @db.VarChar(6)
+  UserUpd String   @db.VarChar(20)
+  DateUpd DateTime @db.DateTime
+  MsRW    MsRW     @relation(fields: [RWID], references: [RWID], onUpdate: NoAction, map: "FK_MSRT_FK_MSRT_M_MSRW")
+}
+
+model MsRW {
+  RWID        Int      @id(map: "PK_MSRW") @default(autoincrement()) @db.SmallInt
+  KecamatanID String   @db.VarChar(6)
+  KelurahanID String   @db.VarChar(6)
+  RW          String   @db.VarChar(6)
+  UserUpd     String   @db.VarChar(20)
+  DateUpd     DateTime @db.DateTime
+  MsRT        MsRT[]
+}
+
+model MsSatuanOmzet {
+  OmzetID           String              @id(map: "PK_MsSatuanOmzet") @db.Char(1)
+  SatuanOmzet       String              @db.VarChar(50)
+  TypeOmzet         String              @db.Char(1)
+  MsJenisPendapatan MsJenisPendapatan[] @ignore
+}
+
+model MsStrategisDtl {
+  DetailID         Int            @id(map: "PK_MsStrategisDtl")
+  StrategisID      String         @db.Char(1)
+  NamaStrategisDtl String         @db.VarChar(50)
+  Nilai            Decimal        @db.Decimal(18, 2)
+  UserUpd          String         @db.VarChar(20)
+  DateUpd          DateTime       @db.DateTime
+  MsStrategisHdr   MsStrategisHdr @relation(fields: [StrategisID], references: [StrategisID], onUpdate: NoAction, map: "FK_MsStrategisDtl_MsStrategisHdr")
+}
+
+model MsStrategisHdr {
+  StrategisID    String           @db.Char(1)
+  NamaStrategis  String           @db.VarChar(20)
+  Persentase     Decimal          @db.Decimal(18, 2)
+  MsStrategisDtl MsStrategisDtl[]
+
+  @@id([StrategisID], map: "PK_MsStrategisHdr")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model MsTargetPendapatan {
+  TahunPendapatan  String   @db.Char(4)
+  UPTID            String   @db.VarChar(5)
+  TargetPendapatan Decimal  @db.Decimal(18, 2)
+  Status           String   @db.Char(1)
+  UserUpd          String   @db.VarChar(20)
+  DateUpd          DateTime @db.DateTime
+  MsUPT            MsUPT    @relation(fields: [UPTID], references: [UPTID], onUpdate: NoAction, map: "FK_MsTargetPendapatan_MsUPT")
+
+  @@ignore
+}
+
+model MsTarifLokasi {
+  LokasiID     Int      @id(map: "PK_MsTarifLokasi") @default(autoincrement())
+  NamaLokasi   String   @db.VarChar(100)
+  PeriodePajak String   @db.Char(2)
+  TarifPajak   Decimal  @db.Decimal(5, 3)
+  Satuan       String   @db.VarChar(20)
+  Target       String   @db.Char(1)
+  Status       String   @db.Char(1)
+  UserUpd      String   @db.VarChar(20)
+  DateUpd      DateTime @db.DateTime
+}
+
+model MsTipeLokasi {
+  TipeKelas        String             @id(map: "PK_MsTipeLokasi") @db.Char(1)
+  NamaKelas        String             @db.VarChar(50)
+  Keterangan       String             @db.VarChar(50)
+  MsTitikLokasiHdr MsTitikLokasiHdr[]
+}
+
+model MsTitikLokasiDtl {
+  LokasiID         Int
+  LuasReklame      Int              @db.TinyInt
+  Keterangan       String?          @db.VarChar(20)
+  NilaiStrategis   Decimal?         @db.Decimal(18, 0)
+  NJOPR            Decimal?         @db.Decimal(18, 0)
+  UserUpd          String?          @db.VarChar(20)
+  DateUpd          DateTime?        @db.DateTime
+  MsTitikLokasiHdr MsTitikLokasiHdr @relation(fields: [LokasiID], references: [LokasiID], onUpdate: NoAction, map: "FK_MsTitikLokasiDtl_MsTitikLokasiHdr")
+
+  @@id([LokasiID, LuasReklame], map: "PK_MsTitikLokasiDtl")
+}
+
+model MsTitikLokasiHdr {
+  LokasiID         Int                @id(map: "PK_MsTitikLokasiHdr") @default(autoincrement())
+  NomorTitik       Int
+  NamaLokasi       String             @db.VarChar(255)
+  TipeKelas        String             @db.Char(1)
+  TarifPajak       Decimal            @db.Decimal(18, 2)
+  PeriodePajak     String             @db.Char(2)
+  Persentase       Decimal            @db.Decimal(18, 2)
+  UserUpd          String             @db.VarChar(20)
+  DateUpd          DateTime           @db.DateTime
+  MsTitikLokasiDtl MsTitikLokasiDtl[]
+  MsTipeLokasi     MsTipeLokasi       @relation(fields: [TipeKelas], references: [TipeKelas], onUpdate: NoAction, map: "FK_MsTitikLokasiHdr_MsTipeLokasi")
+}
+
+model MsUPT {
+  UPTID              String               @id(map: "PK_MsUPT") @db.VarChar(5)
+  ParentID           String               @db.VarChar(5)
+  KodeUPT            String               @unique(map: "IX_MsUPT") @db.VarChar(20)
+  UPT                String               @db.VarChar(200)
+  KepalaUPT          String               @db.VarChar(50)
+  PangkatUPT         String               @db.VarChar(20)
+  NIPUPT             String               @db.VarChar(50)
+  AlamatUPT          String               @db.VarChar(100)
+  TelpUPT            String               @db.VarChar(50)
+  FaxUPT             String               @db.VarChar(50)
+  LevelUPT           String               @db.Char(1)
+  Status             String               @db.Char(1)
+  UserUpd            String               @db.VarChar(20)
+  DateUpd            DateTime             @db.DateTime
+  MsBenda            MsBenda[]
+  MsPegawai          MsPegawai[]
+  MsTargetPendapatan MsTargetPendapatan[] @ignore
+  MsUserPendapatan   MsUserPendapatan[]
+  SetoranBendaHdr    SetoranBendaHdr[]
+}
+
+model MsUserPendapatan {
+  UPID    String   @id(map: "PK_MsUserPendapatan") @db.VarChar(5)
+  UPTID   String   @db.VarChar(5)
+  Status  String   @db.Char(1)
+  UserUpd String   @db.VarChar(20)
+  DateUpd DateTime @db.DateTime
+  MsUPT   MsUPT    @relation(fields: [UPTID], references: [UPTID], onUpdate: NoAction, map: "FK_MsUserPendapatan_MsUPT")
+}
+
+model MsWP {
+  ObyekBadanID        Int                   @id(map: "PK_MsWP")
+  UsahaBadan          String                @db.VarChar(10)
+  TglPendataan        DateTime?             @db.DateTime
+  WPID                Int
+  UserUpd             String                @db.VarChar(20)
+  DateUpd             DateTime              @db.DateTime
+  MsWPData            MsWPData              @relation(fields: [WPID], references: [WPID], onUpdate: NoAction, map: "FK_MsWP_MsWPData")
+  PendataanByOmzet    PendataanByOmzet[]
+  PendataanReklameHdr PendataanReklameHdr[]
+  PenetapanByOmzet    PenetapanByOmzet[]
+  PenetapanReklameHdr PenetapanReklameHdr[]
+}
+
+model MsWPData {
+  WPID             Int          @id(map: "PK_MsObyekBadan")
+  ObyekBadanNo     String       @db.VarChar(30)
+  NamaBadan        String       @db.VarChar(50)
+  NIK              String?      @db.VarChar(16)
+  GrupUsahaID      String       @db.VarChar(2)
+  KlasifikasiID    String       @db.VarChar(5)
+  LokasiID         String       @db.VarChar(2)
+  AlamatBadan      String       @db.VarChar(255)
+  KotaBadan        String       @db.VarChar(5)
+  KecamatanBadan   String       @db.VarChar(6)
+  KelurahanBadan   String       @db.VarChar(6)
+  RWBadan          Int          @db.SmallInt
+  RTBadan          Int          @db.SmallInt
+  NoTelpBadan      String       @db.VarChar(30)
+  NoFaxBadan       String       @db.VarChar(30)
+  NamaPemilik      String       @db.VarChar(50)
+  JabatanPemilik   String       @db.VarChar(30)
+  AlamatPemilik    String       @db.VarChar(255)
+  KotaPemilik      String       @db.VarChar(5)
+  KecamatanPemilik String       @db.VarChar(6)
+  KelurahanPemilik String       @db.VarChar(6)
+  RWPemilik        Int          @db.SmallInt
+  RTPemilik        Int          @db.SmallInt
+  NoTelpPemilik    String       @db.VarChar(30)
+  NoFaxPemilik     String       @db.VarChar(30)
+  TglPendaftaran   DateTime     @db.DateTime
+  TglPengesahan    DateTime     @db.DateTime
+  NoPengesahan     String       @db.VarChar(30)
+  TglPenghapusan   DateTime?    @db.DateTime
+  PetugasPendaftar String       @db.VarChar(2)
+  Insidentil       String       @db.Char(1)
+  UserUpd          String       @db.VarChar(20)
+  DateUpd          DateTime     @db.DateTime
+  MsWP             MsWP[]
+  MsKota           MsKota       @relation(fields: [KotaBadan], references: [KotaID], onUpdate: NoAction, map: "FK_MsWPData_MsKota")
+  NomorKohir       NomorKohir[]
+}
+
+model MsWPO {
+  ObyekBadanID Int       @id(map: "PK_MsWPO")
+  UsahaBadan   String    @db.VarChar(10)
+  TglPendataan DateTime? @db.DateTime
+  WPID         Int
+  UserUpd      String    @db.VarChar(20)
+  DateUpd      DateTime  @db.DateTime
+  MsWPOData    MsWPOData @relation(fields: [WPID], references: [WPID], onUpdate: NoAction, map: "FK_MsWPO_MsWPOData")
+}
+
+model MsWPOData {
+  WPID             Int       @id(map: "PK_MsWPOData")
+  ObyekBadanNo     String    @db.VarChar(30)
+  NamaBadan        String    @db.VarChar(50)
+  NIK              String?   @db.VarChar(16)
+  GrupUsahaID      String    @db.VarChar(2)
+  KlasifikasiID    String    @db.VarChar(5)
+  LokasiID         String    @db.VarChar(2)
+  AlamatBadan      String    @db.VarChar(255)
+  KotaBadan        String    @db.VarChar(5)
+  KecamatanBadan   String    @db.VarChar(6)
+  KelurahanBadan   String    @db.VarChar(6)
+  RWBadan          Int       @db.SmallInt
+  RTBadan          Int       @db.SmallInt
+  NoTelpBadan      String    @db.VarChar(30)
+  NoFaxBadan       String    @db.VarChar(30)
+  NamaPemilik      String    @db.VarChar(50)
+  JabatanPemilik   String    @db.VarChar(30)
+  AlamatPemilik    String    @db.VarChar(255)
+  KotaPemilik      String    @db.VarChar(5)
+  KecamatanPemilik String    @db.VarChar(6)
+  KelurahanPemilik String    @db.VarChar(6)
+  RWPemilik        Int       @db.SmallInt
+  RTPemilik        Int       @db.SmallInt
+  NoTelpPemilik    String    @db.VarChar(30)
+  NoFaxPemilik     String    @db.VarChar(30)
+  TglPendaftaran   DateTime  @db.DateTime
+  TglPengesahan    DateTime  @db.DateTime
+  NoPengesahan     String    @db.VarChar(30)
+  TglPenghapusan   DateTime? @db.DateTime
+  PetugasPendaftar String    @db.VarChar(2)
+  Insidentil       String    @db.Char(1)
+  UserUpd          String    @db.VarChar(20)
+  DateUpd          DateTime  @db.DateTime
+  MsWPO            MsWPO[]
+  MsKota           MsKota    @relation(fields: [KotaBadan], references: [KotaID], onUpdate: NoAction, map: "FK_MsWPOData_MsKota")
+}
+
+model NomorKohir {
+  KohirID             String                @id(map: "PK_NomorKohir") @db.VarChar(8)
+  MasaAwal            DateTime              @db.DateTime
+  MasaAkhir           DateTime              @db.DateTime
+  TglPenetapan        DateTime              @db.DateTime
+  Penagih             String                @db.VarChar(2)
+  WPID                Int
+  TglKurangBayar      DateTime?             @db.DateTime
+  KohirKet            String?               @db.VarChar(256)
+  UserUpd             String                @db.VarChar(20)
+  DateUpd             DateTime              @db.DateTime
+  UserAdd             String?               @db.VarChar(20)
+  MsWPData            MsWPData              @relation(fields: [WPID], references: [WPID], onUpdate: NoAction, map: "FK_NomorKohir_MsWPData")
+  PenetapanByOmzet    PenetapanByOmzet[]
+  PenetapanReklameHdr PenetapanReklameHdr[]
+}
+
+model PendataanByOmzet {
+  SPT                 String                @id(map: "PK_PendataanByOmzet") @db.VarChar(8)
+  ObyekBadanID        Int
+  TglPendataan        DateTime              @db.DateTime
+  MasaAwal            DateTime              @db.DateTime
+  MasaAkhir           DateTime              @db.DateTime
+  UrutTgl             Int
+  JmlOmzetAwal        Decimal?              @db.Decimal(18, 6)
+  TarifPajak          Decimal               @db.Decimal(18, 2)
+  UPTID               String                @db.VarChar(5)
+  Status              String                @db.Char(1)
+  UserUpd             String                @db.VarChar(20)
+  DateUpd             DateTime              @db.DateTime
+  KegSatker           String?               @db.VarChar(5)
+  MsWP                MsWP                  @relation(fields: [ObyekBadanID], references: [ObyekBadanID], onUpdate: NoAction, map: "FK_PendataanByOmzet_MsWP")
+  PendataanByOmzetDtl PendataanByOmzetDtl[]
+}
+
+model PendataanByOmzetDtl {
+  SPT              String            @db.VarChar(8)
+  NoUrut           Int               @db.TinyInt
+  NoKohir          String?           @db.VarChar(8)
+  Lokasi           String?           @db.VarChar(255)
+  Luas             Decimal?          @db.Decimal(18, 6)
+  UsahaID          Int
+  TarifPajak       Decimal           @db.Decimal(18, 2)
+  Status           String            @db.Char(1)
+  UserUpd          String            @db.VarChar(20)
+  DateUpd          DateTime          @db.DateTime
+  PendataanByOmzet PendataanByOmzet  @relation(fields: [SPT], references: [SPT], onUpdate: NoAction, map: "FK_PendataanByOmzetDtl_PendataanByOmzet")
+  PenetapanByOmzet PenetapanByOmzet? @relation(fields: [NoKohir], references: [NoKohir], onDelete: NoAction, onUpdate: NoAction, map: "FK_PendataanByOmzetDtl_PenetapanByOmzet")
+
+  @@id([SPT, NoUrut], map: "PK_PendataanByOmzetDtl")
+}
+
+model PendataanNSL {
+  NSLID    Int      @id(map: "PK_PendataanNSL")
+  SPT      String   @db.VarChar(8)
+  NoUrut   Int      @db.TinyInt
+  DetailID Int
+  UserUpd  String   @db.VarChar(20)
+  DateUpd  DateTime @db.DateTime
+}
+
+model PendataanReklameDtl {
+  SPT                 String              @db.VarChar(8)
+  NoUrut              Int                 @db.TinyInt
+  JudulReklame        String              @db.VarChar(255)
+  JenisLokasi         String              @db.Char(1)
+  LokasiID            Int
+  AlamatPasang        String?             @db.VarChar(255)
+  TinggiReklame       Decimal?            @db.Decimal(5, 2)
+  PanjangReklame      Decimal?            @db.Decimal(5, 2)
+  LebarReklame        Decimal?            @db.Decimal(5, 2)
+  SudutPandang        Int?                @db.TinyInt
+  JumlahReklame       Int?
+  TarifPajak          Decimal             @db.Decimal(18, 2)
+  UserUpd             String              @db.VarChar(20)
+  DateUpd             DateTime            @db.DateTime
+  PendataanReklameHdr PendataanReklameHdr @relation(fields: [SPT], references: [SPT], onUpdate: NoAction, map: "FK_PendataanReklameDtl_PendataanReklameHdr")
+
+  @@id([SPT, NoUrut], map: "PK_PendataanReklameDtl")
+}
+
+model PendataanReklameHdr {
+  SPT                 String                @id(map: "PK_PendataanReklameHdr") @db.VarChar(8)
+  ObyekBadanID        Int
+  TglPendataan        DateTime              @db.DateTime
+  MasaAwal            DateTime              @db.DateTime
+  MasaAkhir           DateTime              @db.DateTime
+  UrutTgl             Int
+  TotalPajak          Decimal               @db.Decimal(18, 2)
+  UPTID               String                @db.VarChar(5)
+  Status              String                @db.Char(1)
+  UserUpd             String                @db.VarChar(20)
+  DateUpd             DateTime              @db.DateTime
+  Kontrak             String?               @db.VarChar(50)
+  PendataanReklameDtl PendataanReklameDtl[]
+  MsWP                MsWP                  @relation(fields: [ObyekBadanID], references: [ObyekBadanID], onUpdate: NoAction, map: "FK_PendataanReklameHdr_MsWP")
+}
+
+model PenetapanByOmzet {
+  NoKohir             String                @id(map: "PK_PenetapanByOmzet") @db.VarChar(8)
+  KohirID             String                @db.VarChar(8)
+  ObyekBadanID        Int
+  TglPenetapan        DateTime              @db.DateTime
+  TglJatuhTempo       DateTime              @db.DateTime
+  MasaAwal            DateTime              @db.DateTime
+  MasaAkhir           DateTime              @db.DateTime
+  UrutTgl             Int
+  JmlOmzetAwal        Decimal?              @db.Decimal(18, 6)
+  TarifPajak          Decimal               @db.Decimal(18, 2)
+  Denda               Decimal?              @db.Decimal(18, 2)
+  Kenaikan            Decimal?              @db.Decimal(18, 2)
+  IsPaid              String                @db.Char(1)
+  TglBayar            DateTime?             @db.DateTime
+  JmlBayar            Decimal?              @db.Decimal(18, 2)
+  TglKurangBayar      DateTime?             @db.DateTime
+  JmlKurangBayar      Decimal?              @db.Decimal(18, 2)
+  JmlPeringatan       Int?                  @db.TinyInt
+  UPTID               String                @db.VarChar(5)
+  Status              String                @db.Char(1)
+  UserUpd             String                @db.VarChar(20)
+  DateUpd             DateTime              @db.DateTime
+  KegSatker           String?               @db.VarChar(5)
+  UserAdd             String?               @db.VarChar(20)
+  DendaID             Int?
+  PendataanByOmzetDtl PendataanByOmzetDtl[]
+  MsWP                MsWP                  @relation(fields: [ObyekBadanID], references: [ObyekBadanID], onUpdate: NoAction, map: "FK_PenetapanByOmzet_MsWP")
+  NomorKohir          NomorKohir            @relation(fields: [KohirID], references: [KohirID], onUpdate: NoAction, map: "FK_PenetapanByOmzet_NomorKohir")
+}
+
+model PenetapanNSL {
+  NSLID    Int      @id(map: "PK_PenetapanNSL")
+  NoKohir  String   @db.VarChar(8)
+  NoUrut   Int      @db.TinyInt
+  DetailID Int
+  UserUpd  String   @db.VarChar(20)
+  DateUpd  DateTime @db.DateTime
+}
+
+model PenetapanReklameDtl {
+  NoKohir             String              @db.VarChar(8)
+  NoUrut              Int                 @db.TinyInt
+  JudulReklame        String              @db.VarChar(255)
+  JenisLokasi         String              @db.Char(1)
+  LokasiID            Int
+  AlamatPasang        String?             @db.VarChar(255)
+  TinggiReklame       Decimal?            @db.Decimal(5, 2)
+  PanjangReklame      Decimal?            @db.Decimal(5, 2)
+  LebarReklame        Decimal?            @db.Decimal(5, 2)
+  SudutPandang        Int?                @db.TinyInt
+  JumlahReklame       Int?
+  TarifPajak          Decimal             @db.Decimal(18, 2)
+  UserUpd             String              @db.VarChar(20)
+  DateUpd             DateTime            @db.DateTime
+  PenetapanReklameHdr PenetapanReklameHdr @relation(fields: [NoKohir], references: [NoKohir], onUpdate: NoAction, map: "FK_PenetapanReklameDtl_PenetapanReklameHdr")
+
+  @@id([NoKohir, NoUrut], map: "PK_PenetapanReklameDtl")
+}
+
+model PenetapanReklameHdr {
+  NoKohir             String                @id(map: "PK_PenetapanReklameHdr") @db.VarChar(8)
+  KohirID             String                @db.VarChar(8)
+  ObyekBadanID        Int
+  TglPenetapan        DateTime              @db.DateTime
+  TglJatuhTempo       DateTime              @db.DateTime
+  MasaAwal            DateTime              @db.DateTime
+  MasaAkhir           DateTime              @db.DateTime
+  UrutTgl             Int
+  TotalPajak          Decimal               @db.Decimal(18, 2)
+  Denda               Decimal?              @db.Decimal(18, 2)
+  Kenaikan            Decimal?              @db.Decimal(18, 2)
+  IsPaid              String                @db.Char(1)
+  TglBayar            DateTime?             @db.DateTime
+  JmlBayar            Decimal?              @db.Decimal(18, 2)
+  TglKurangBayar      DateTime?             @db.DateTime
+  JmlKurangBayar      Decimal?              @db.Decimal(18, 2)
+  JmlPeringatan       Int?                  @db.TinyInt
+  UPTID               String                @db.VarChar(5)
+  Status              String                @db.Char(1)
+  UserUpd             String                @db.VarChar(20)
+  DateUpd             DateTime              @db.DateTime
+  UserAdd             String?               @db.VarChar(20)
+  Kontrak             String?               @db.VarChar(50)
+  PenetapanReklameDtl PenetapanReklameDtl[]
+  MsWP                MsWP                  @relation(fields: [ObyekBadanID], references: [ObyekBadanID], onUpdate: NoAction, map: "FK_PenetapanReklameHdr_MsWP")
+  NomorKohir          NomorKohir            @relation(fields: [KohirID], references: [KohirID], onUpdate: NoAction, map: "FK_PenetapanReklameHdr_NomorKohir")
+}
+
+model PersediaanBenda {
+  PersediaanID String   @id(map: "PK_PersediaanBenda") @db.VarChar(10)
+  TglTransaksi DateTime @db.DateTime
+  BendaID      String   @db.VarChar(5)
+  NoAwal       String   @db.VarChar(15)
+  NoAkhir      String   @db.VarChar(15)
+  NoAwal2      String   @db.VarChar(15)
+  NoAkhir2     String   @db.VarChar(15)
+  JmlBenda     Int
+  JmlPerBlok   Int      @db.SmallInt
+  JnsTransaksi String   @db.Char(1)
+  Keterangan   String   @db.VarChar(50)
+  Status       String   @db.Char(1)
+  UserUpd      String   @db.VarChar(20)
+  DateUpd      DateTime @db.DateTime
+  MsBenda      MsBenda  @relation(fields: [BendaID], references: [BendaID], onUpdate: NoAction, map: "FK_PersediaanBenda_MsBenda")
+}
+
+model SetoranBendaDtl {
+  DetailID        String          @id(map: "PK_SetoranBendaDtl") @db.VarChar(10)
+  HeaderID        String          @db.VarChar(10)
+  BendaID         String          @db.VarChar(5)
+  JmlBenda        Int
+  TarifBenda      Decimal         @db.Decimal(18, 2)
+  NoAwal          String          @db.VarChar(15)
+  NoAkhir         String          @db.VarChar(15)
+  NoAwal2         String          @db.VarChar(15)
+  NoAkhir2        String          @db.VarChar(15)
+  JmlSetoran      Decimal         @db.Decimal(18, 2)
+  Keterangan      String          @db.VarChar(50)
+  Status          String          @db.Char(1)
+  UserUpd         String          @db.VarChar(20)
+  DateUpd         DateTime        @db.DateTime
+  MsBenda         MsBenda         @relation(fields: [BendaID], references: [BendaID], onUpdate: NoAction, map: "FK_SetoranBendaDtl_MsBenda")
+  SetoranBendaHdr SetoranBendaHdr @relation(fields: [HeaderID], references: [HeaderID], onUpdate: NoAction, map: "FK_SetoranBendaDtl_SetoranBendaHdr")
+}
+
+model SetoranBendaHdr {
+  HeaderID        String            @id(map: "PK_SetoranBendaHdr") @db.VarChar(10)
+  UPTID           String            @db.VarChar(5)
+  NoSTS           String            @unique(map: "IX_SetoranBendaHdr") @db.VarChar(20)
+  STSKe           Int
+  TglSetoran      DateTime          @db.DateTime
+  Status          String            @db.Char(1)
+  UserUpd         String            @db.VarChar(20)
+  DateUpd         DateTime          @db.DateTime
+  SetoranBendaDtl SetoranBendaDtl[]
+  MsUPT           MsUPT             @relation(fields: [UPTID], references: [UPTID], onUpdate: NoAction, map: "FK_SetoranBendaHdr_MsUPT")
+}
+
+model SetoranHist {
+  NoKohir       String    @db.VarChar(8)
+  NoUrut        Int       @db.TinyInt
+  SubKohir      String    @db.VarChar(11)
+  TglBayar      DateTime  @db.DateTime
+  JmlBayar      Decimal   @db.Decimal(18, 2)
+  JmlBayarDenda Decimal?  @db.Decimal(18, 2)
+  Transaksi     String?   @db.Char(1)
+  NoSSPD        String?   @db.VarChar(50)
+  NamaPenyetor  String?   @db.VarChar(50)
+  STS           String?   @db.VarChar(10)
+  STSDenda      String?   @db.VarChar(10)
+  Keterangan    String?   @db.VarChar(256)
+  UserUpd       String    @db.VarChar(20)
+  DateUpd       DateTime  @db.DateTime
+  NTPD          String?   @db.VarChar(50)
+  NTB           String?   @db.VarChar(50)
+  TglNTPD       DateTime? @db.DateTime
+
+  @@id([NoKohir, NoUrut], map: "PK_SetoranHist")
+}
+
+model SetoranUPTDtl {
+  DetailID      String        @id(map: "PK_SetoranUPTDtl") @db.VarChar(10)
+  HeaderID      String        @db.VarChar(10)
+  JmlSetoran    Decimal       @db.Decimal(18, 2)
+  Status        String        @db.Char(1)
+  UserUpd       String        @db.VarChar(20)
+  DateUpd       DateTime      @db.DateTime
+  SetoranUPTHdr SetoranUPTHdr @relation(fields: [HeaderID], references: [HeaderID], onUpdate: NoAction, map: "FK_SetoranUPTDtl_SetoranUPTHdr")
+}
+
+model SetoranUPTHdr {
+  HeaderID      String          @id(map: "PK_SetoranUPTHdr") @db.VarChar(10)
+  UPTID         String          @db.VarChar(5)
+  SetoranDari   String?         @db.VarChar(5)
+  BendaharaID   String          @db.VarChar(2)
+  NoSTS         String          @unique(map: "IX_SetoranUPTHdr") @db.VarChar(50)
+  STSKe         Int
+  TglSetoran    DateTime        @db.DateTime
+  Keterangan    String          @db.VarChar(100)
+  StatusBayar   String          @db.Char(1)
+  Status        String          @db.Char(1)
+  UserUpd       String          @db.VarChar(20)
+  DateUpd       DateTime        @db.DateTime
+  SetoranUPTDtl SetoranUPTDtl[]
+  MsBendahara   MsBendahara     @relation(fields: [BendaharaID], references: [BendaharaID], onUpdate: NoAction, map: "FK_SetoranUPTHdr_MsBendahara")
+}
+
+model SuratTeguranHist {
+  SuratID  Int      @id(map: "PK_SuratTeguranHist") @default(autoincrement())
+  KohirID  String   @db.VarChar(8)
+  NoUrut   Int      @db.TinyInt
+  NoSurat  String   @db.VarChar(50)
+  TglSurat DateTime @db.DateTime
+  Status   String   @db.Char(1)
+  UserUpd  String   @db.VarChar(20)
+  DateUpd  DateTime @db.DateTime
+}
+
+model sysdiagrams {
+  name         String @db.NVarChar(128)
+  principal_id Int
+  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B612334397B") @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_principal_name")
+}
+
+model tblFungsi {
+  SiteID       String   @db.VarChar(10)
+  code_fungsi  String   @db.VarChar(10)
+  file_name    String   @db.VarChar(50)
+  description  String   @db.VarChar(30)
+  level_fungsi Int
+  dateupd      DateTime @db.DateTime
+  userupd      String   @db.VarChar(10)
+
+  @@id([SiteID, code_fungsi], map: "PK_tblFungsi")
+}
+
+model tblGroupFungsi {
+  SiteID       String   @db.VarChar(10)
+  code_group   String   @db.VarChar(10)
+  flag_program String   @db.VarChar(2)
+  code_fungsi  String   @db.VarChar(10)
+  MenuID       Int      @id(map: "PK_tblGroupFungsi") @default(autoincrement())
+  code_parent  String   @db.VarChar(10)
+  description  String   @db.VarChar(30)
+  dateupd      DateTime @db.DateTime
+  userupd      String   @db.VarChar(10)
+}
+
+model tblGroupUser {
+  code_group  String    @id(map: "PK_tblGroupUser") @db.VarChar(10)
+  nama_group  String    @db.VarChar(30)
+  description String?   @db.VarChar(50)
+  level_group Int       @db.SmallInt
+  DateUpd     DateTime  @db.DateTime
+  UserUpd     String    @db.VarChar(10)
+  tblUser     tblUser[]
+}
+
+model tblUser {
+  UID          String       @id(map: "PK_tblUser") @db.VarChar(15)
+  code_group   String       @db.VarChar(10)
+  nama_user    String       @db.VarChar(50)
+  password     String       @db.VarChar(128)
+  flag_active  String       @db.VarChar(1)
+  date_exp     DateTime     @db.DateTime
+  user_level   Int
+  UserUpd      String       @db.VarChar(20)
+  DateUpd      DateTime     @db.DateTime
+  tblGroupUser tblGroupUser @relation(fields: [code_group], references: [code_group], onUpdate: NoAction, map: "FK_tblUser_tblGroupUser")
+}
+
+model TransactionControl {
+  JenisPendapatanID String    @id(map: "PK_TransactionControl") @db.VarChar(10)
+  NamaTransaksi     String?   @db.VarChar(75)
+  YearTransaksi     String?   @db.Char(2)
+  MonthTransaksi    String?   @db.Char(2)
+  LastNum           Int?
+  LastDate          DateTime? @db.DateTime
+  ResetType         String?   @db.Char(1)
+}
