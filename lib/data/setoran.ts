@@ -3,8 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { db } from "../db";
 
-// ... existing code ...
-
 export interface DaftarSetoran {
   NamaWajibPajak: string;
   RincianJenisPajak: string;
@@ -75,6 +73,6 @@ export async function getDaftarSetoran(
       s.TglBayar DESC,
       s.NTB DESC
   `;
-  revalidatePath("/daftar-setoran");
+  revalidatePath("/");
   return data;
 }
